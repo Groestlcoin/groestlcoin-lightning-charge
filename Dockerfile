@@ -1,6 +1,6 @@
 FROM node:8.9-slim as builder
 
-ARG STANDALONE
+ARG STANDALONE=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends git \
     $([ -n "$STANDALONE" ] || echo "autoconf automake build-essential libtool libgmp-dev \
