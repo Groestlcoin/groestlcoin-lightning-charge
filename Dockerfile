@@ -23,8 +23,7 @@ RUN [ -n "$STANDALONE" ] || \
     (mkdir /opt/groestlcoin && cd /opt/groestlcoin \
     && wget -qO groestlcoin.tar.gz "$GROESTLCOIN_URL" \
     && echo "$GROESTLCOIN_SHA256 groestlcoin.tar.gz" | sha256sum -c - \
-    && tar -xzvf groestlcoin.tar.gz groestlcoin-cli --exclude=*-qt) \
-    && rm groestlcoin.tar.gz
+    && tar -xzvf groestlcoin.tar.gz groestlcoin-cli --exclude=*-qt)
 
 RUN mkdir /opt/bin && ([ -n "$STANDALONE" ] || \
     (mv /opt/lightningd/cli/lightning-cli /opt/bin/ \
