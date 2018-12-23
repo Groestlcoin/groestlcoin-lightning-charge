@@ -4,7 +4,7 @@ set -x
 set -eo pipefail
 
 VER=`jq -r .version package.json`
-NAME=${1:-shesek/lightning-charge}
+NAME=${1:-groestlcoin/groestlcoin-lightning-charge}
 
 docker build -t charge .
 docker build -t charge-standalone --build-arg STANDALONE=1 .

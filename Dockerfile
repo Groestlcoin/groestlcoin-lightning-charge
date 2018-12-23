@@ -7,35 +7,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
                                      libsqlite3-dev python python3 wget zlib1g-dev")
 
 ARG TESTRUNNER
-ARG LIGHTNINGD_VERSION=v0.6.2
+ARG LIGHTNINGD_VERSION=master
 
 RUN [ -n "$STANDALONE" ] || \
-    (git clone https://github.com/ElementsProject/lightning.git /opt/lightningd \
+    (git clone https://github.com/groestlcoin/lightning.git /opt/lightningd \
     && cd /opt/lightningd \
     && git checkout $LIGHTNINGD_VERSION \
     && DEVELOPER=$TESTRUNNER ./configure \
     && make)
 
-ENV BITCOIN_VERSION 0.17.0.1
-ENV BITCOIN_URL https://bitcoincore.org/bin/bitcoin-core-$BITCOIN_VERSION/bitcoin-$BITCOIN_VERSION-x86_64-linux-gnu.tar.gz
-ENV BITCOIN_SHA256 6ccc675ee91522eee5785457e922d8a155e4eb7d5524bd130eb0ef0f0c4a6008
-ENV BITCOIN_ASC_URL https://bitcoincore.org/bin/bitcoin-core-$BITCOIN_VERSION/SHA256SUMS.asc
-ENV BITCOIN_PGP_KEY 01EA5486DE18A882D4C2684590C8019E36C2E964
+ENV GROESTLCOIN_VERSION 2.16.3
+ENV GROESTLCOIN_URL https://github.com/Groestlcoin/groestlcoin/releases/download/v2.16.3/groestlcoin-2.16.3-x86_64-linux-gnu.tar.gz
+ENV GROESTLCOIN_SHA256 f15bd5e38b25a103821f1563cd0e1b2cf7146ec9f9835493a30bd57313d3b86f
 RUN [ -n "$STANDALONE" ] || \
-    (mkdir /opt/bitcoin && cd /opt/bitcoin \
-    && wget -qO bitcoin.tar.gz "$BITCOIN_URL" \
-    && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
-    && gpg --keyserver keyserver.ubuntu.com --recv-keys "$BITCOIN_PGP_KEY" \
-    && wget -qO bitcoin.asc "$BITCOIN_ASC_URL" \
-    && gpg --verify bitcoin.asc \
-    && BD=bitcoin-0.17.0/bin \
-    # the above is needed because the dir name is missing the .1 && BD=bitcoin-$BITCOIN_VERSION/bin \
-    && tar -xzvf bitcoin.tar.gz $BD/bitcoind $BD/bitcoin-cli --strip-components=1)
+    (mkdir /opt/groestlcoin && cd /opt/groestlcoin \
+    && wget -qO groestlcoin.tar.gz "$GROESTLCOIN_URL" \
+    && echo "$GROESTLCOIN_SHA256 groestlcoin.tar.gz" | sha256sum -c - \
+    && tar -xzvf groestlcoin.tar.gz groestlcoin-cli --exclude=*-qt) \
+    && rm groestlcoin.tar.gz
 
 RUN mkdir /opt/bin && ([ -n "$STANDALONE" ] || \
     (mv /opt/lightningd/cli/lightning-cli /opt/bin/ \
     && mv /opt/lightningd/lightningd/lightning* /opt/bin/ \
-    && mv /opt/bitcoin/bin/* /opt/bin/))
+    && mv /opt/groestlcoin/bin/* /opt/bin/))
 
 WORKDIR /opt/charged
 
