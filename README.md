@@ -63,7 +63,7 @@ Runs in `testnet` mode by default, set `NETWORK` to override.
 If you want to experiment in `regtest` mode and don't care about persisting data, this should do:
 
 ```bash
-$ docker run -e NETWORK=regtest -e API_TOKEN=mySecretToken -p 9112:9112 groestlcoon/groestlcoin-lightning-charge
+$ docker run -e NETWORK=regtest -e API_TOKEN=mySecretToken -p 9112:9112 groestlcoin/groestlcoin-lightning-charge
 ```
 
 To connect to an existing `lightningd` instance running on the same machine,
