@@ -8,6 +8,8 @@ trap 'kill `jobs -p`' SIGTERM
 
 [[ "$NETWORK" == "mainnet" ]] && NETWORK=groestlcoin
 
+[[ "$NETWORK" != "groestlcoin" ]] && NETWORK_ARG="-$NETWORK"
+
 if [ -d /etc/lightning ]; then
   echo -n "Using lightningd directory mounted in /etc/lightning... "
   LN_PATH=/etc/lightning
@@ -43,13 +45,13 @@ else
     mkdir -p /data/groestlcoin
     RPC_OPT="-datadir=/data/groestlcoin"
 
-    groestlcoind -$NETWORK $RPC_OPT $BITCOIND_OPTS &
+    groestlcoind $NETWORK_ARG $RPC_OPT $BITCOIND_OPT &
     echo -n "waiting for cookie... "
     sed --quiet '/^\.cookie$/ q' <(inotifywait -e create,moved_to --format '%f' -qmr /data/groestlcoin)
   fi
 
   echo -n "waiting for RPC... "
-  groestlcoin-cli -$NETWORK $RPC_OPT -rpcwait getblockchaininfo > /dev/null
+  groestlcoin-cli $NETWORK_ARG $RPC_OPT -rpcwait getblockchaininfo > /dev/null
   echo "ready."
 
   # Setup lightning

@@ -41,6 +41,7 @@ echo Setting up groestlcoind >&2
 mkdir -p $GRS_DIR
 cat >$GRS_DIR/groestlcoin.conf <<EOL
 regtest=1
+printtoconsole=0
 
 [regtest]
 rpcport=`get-port`
