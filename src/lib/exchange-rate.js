@@ -9,8 +9,8 @@ const enc = encodeURIComponent
 // Fetch current exchange rate from Coingecko
 // @TODO cache results?
 const getRate = currency =>
-  request.get(`https://api.coingecko.com/api/v3/simple/price?ids=groestlcoin&vs_currencies=${enc(currency)}`)
-    .then(res => res.body.groestlcoin[currency])
+  request.get(`https://min-api.cryptocompare.com/data/price?fsym=GRS&tsyms=${enc(currency)}`)
+    .then(res => res.body[currency])
     .catch(err => Promise.reject(err.status == 404 ? new Error('Unknown currency: '+currency) : err))
 
 // Convert `amount` units of `currency` to msatoshis
