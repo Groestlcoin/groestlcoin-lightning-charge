@@ -1,8 +1,8 @@
-FROM node:8.9-slim as builder
+FROM node:8.15-slim as builder
 
 ARG STANDALONE=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends git \
+RUN mkdir /opt/local && apt-get update && apt-get install -y --no-install-recommends git \
     $([ -n "$STANDALONE" ] || echo "autoconf automake build-essential libtool libgmp-dev \
                                      libsqlite3-dev python python3 wget zlib1g-dev")
 
@@ -13,8 +13,11 @@ RUN [ -n "$STANDALONE" ] || \
     (git clone https://github.com/groestlcoin/lightning.git /opt/lightningd \
     && cd /opt/lightningd \
     && git checkout $LIGHTNINGD_VERSION \
-    && DEVELOPER=$TESTRUNNER ./configure \
-    && make)
+    && DEVELOPER=$TESTRUNNER ./configure --prefix=./target \
+    && make -j3 \
+    && make install \
+    && rm -r target/share \
+    && mv -f target/* /opt/local/)
 
 ENV GROESTLCOIN_VERSION 2.17.2
 ENV GROESTLCOIN_FILENAME groestlcoin-$GROESTLCOIN_VERSION-x86_64-linux-gnu.tar.gz
@@ -37,12 +40,8 @@ RUN [ -n "$STANDALONE" ] || \
     && gpg --verify groestlcoin.asc \
     && cat groestlcoin.asc | grep "$GROESTLCOIN_FILENAME" | sha256sum -c - \
     && BD=groestlcoin-$GROESTLCOIN_VERSION/bin \
-    && tar -xzvf "$GROESTLCOIN_FILENAME" $BD/groestlcoind $BD/groestlcoin-cli --strip-components=1)
-
-RUN mkdir /opt/bin && ([ -n "$STANDALONE" ] || \
-    (mv /opt/lightningd/cli/lightning-cli /opt/bin/ \
-    && mv /opt/lightningd/lightningd/lightning* /opt/bin/ \
-    && mv /opt/groestlcoin/bin/* /opt/bin/))
+    && tar -xzvf "$GROESTLCOIN_FILENAME" $BD/groestlcoind $BD/groestlcoin-cli --strip-components=1 \
+    && mv bin/* /opt/local/bin/)
 
 WORKDIR /opt/charged
 
@@ -59,7 +58,7 @@ RUN npm run dist \
     && rm -rf src \
     && test -n "$TESTRUNNER" || (rm -rf test node_modules && mv -f node_modules.prod node_modules)
 
-FROM node:8.9-slim
+FROM node:8.15-slim
 
 WORKDIR /opt/charged
 ARG TESTRUNNER
@@ -70,13 +69,13 @@ ENV STANDALONE=$STANDALONE
 
 RUN ([ -n "$STANDALONE" ] || ( \
           apt-get update && apt-get install -y --no-install-recommends inotify-tools libgmp-dev libsqlite3-dev \
-          $(test -n "$TESTRUNNER" && echo jq))) \
+          $(test -n "$TESTRUNNER" && echo jq procps))) \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s /opt/charged/bin/charged /usr/bin/charged \
     && mkdir /data \
     && ln -s /data/lightning /tmp/.lightning
 
-COPY --from=builder /opt/bin /usr/bin
+COPY --from=builder /opt/local /usr/local
 COPY --from=builder /opt/charged /opt/charged
 
 CMD [ "bin/docker-entrypoint.sh" ]

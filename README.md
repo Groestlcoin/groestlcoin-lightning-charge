@@ -1,13 +1,5 @@
 # Groestlcoin Lightning Charge
 
-[![build status](https://api.travis-ci.org/ElementsProject/lightning-charge.svg)](https://travis-ci.org/ElementsProject/lightning-charge)
-[![npm release](https://img.shields.io/npm/v/lightning-charge.svg)](https://www.npmjs.com/package/lightning-charge)
-[![docker release](https://img.shields.io/docker/pulls/shesek/lightning-charge.svg)](https://hub.docker.com/r/shesek/lightning-charge/)
-[![MIT license](https://img.shields.io/github/license/elementsproject/lightning-charge.svg)](https://github.com/ElementsProject/lightning-charge/blob/master/LICENSE)
-[![Pull Requests Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![IRC](https://img.shields.io/badge/chat-on%20freenode-brightgreen.svg)](https://webchat.freenode.net/?channels=lightning-charge)
-
-
 A drop-in solution for accepting lightning payments, built on top of [c-lightning](https://github.com/groestlcoin/lightning).
 
 - Simple HTTP REST API, optimized for developer friendliness and ease of integration. Near-zero configuration.
@@ -53,7 +45,7 @@ To deploy Groestlcoin Lightning Charge with Docker, run these commands:
 
 ```bash
 $ mkdir data # make sure to create the folder _before_ running docker
-$ docker run -u `id -u` -v `pwd`/data:/data -p 9735:9735 -p 9112:9112 \
+$ docker run -it -u `id -u` -v `pwd`/data:/data -p 9735:9735 -p 9112:9112 \
              -e API_TOKEN=mySecretToken \
              groestlcoin/groestlcoin-lightning-charge
 ```
@@ -66,7 +58,7 @@ Runs in `testnet` mode by default, set `NETWORK` to override.
 If you want to experiment in `regtest` mode and don't care about persisting data, this should do:
 
 ```bash
-$ docker run -e NETWORK=regtest -e API_TOKEN=mySecretToken -p 9112:9112 groestlcoin/groestlcoin-lightning-charge
+$ docker run -it -e NETWORK=regtest -e API_TOKEN=mySecretToken -p 9112:9112 groestlcoin/groestlcoin-lightning-charge
 ```
 
 To connect to an existing `lightningd` instance running on the same machine,
@@ -191,6 +183,19 @@ $ curl $CHARGE/invoice/OYwwaOQAPMFvg039gj_Rb
 {"id":"OYwwaOQAPMFvg039gj_Rb","msatoshi":"3738106","quoted_currency":"EUR","quoted_amount":"0.5","status":"unpaid",...}
 ```
 
+### `DELETE /invoice/:id`
+
+Delete the specified invoice.
+
+*Body parameters:* `status`
+
+The current status of the invoice needs to be specified in the request body.
+
+```bash
+$ curl -X DELETE $CHARGE/invoice/OYwwaOQAPMFvg039gj_Rb -d status=unpaid
+204 No Content
+```
+
 ### `GET /invoice/:id/wait?timeout=[sec]`
 
 Long-polling invoice payment notification.
@@ -298,7 +303,7 @@ To prevent the test environment files from being deleted after completing the te
 To setup a testing environment without running the tests, run `$ npm run testenv`.
 This will display information about the running services and keep them alive for further inspection.
 
-Tests can also be run using docker: `$ docker build --build-arg TESTRUNNER=1 -t charge . && docker run charge npm test`
+Tests can also be run using docker: `$ docker build --build-arg TESTRUNNER=1 -t charge . && docker run -it charge npm test`
 
 ## License
 

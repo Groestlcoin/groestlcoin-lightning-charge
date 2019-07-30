@@ -57,6 +57,8 @@ command -v inotifywait > /dev/null \
 
 grs -rpcwait getblockchaininfo > /dev/null
 
+addr=`grs getnewaddress`
+
 echo - Generating some blocks... > $dbgout
 grs generate 432 > /dev/null
 

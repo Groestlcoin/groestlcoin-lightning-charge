@@ -21,6 +21,7 @@ export const authMiddleware = (name, pass, realm='Groestlcoin Lightning Charge')
 
   if (!cred || cred.name !== name || cred.pass !== pass)
     res.set('WWW-Authenticate', `Basic realm="${realm}"`)
+       .removeHeader('Access-Control-Allow-Origin')
        .sendStatus(401)
 
   else next()
