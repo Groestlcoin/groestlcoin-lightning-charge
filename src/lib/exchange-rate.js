@@ -14,11 +14,11 @@ const FIXED_RATES    = { GRS: 1 }
 
 const enc = encodeURIComponent
 
-// Fetch current exchange rate from Coingecko
+// Fetch current exchange rate from cryptocompare
 const getRate = memoize(CACHE_TTL, currency =>
   request.get(`https://min-api.cryptocompare.com/data/price?fsym=GRS&tsyms=${enc(currency)}`)
     .proxy(RATE_PROXY)
-    .then(res => res.body[currency]))
+    .then(res => res.body[currency])
     .catch(err => Promise.reject(err.status == 404 ? new Error('Unknown currency: '+currency) : err))
 )
 
