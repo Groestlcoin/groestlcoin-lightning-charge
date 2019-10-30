@@ -3,8 +3,8 @@ FROM node:8.15-slim as builder
 ARG STANDALONE=1
 
 RUN mkdir /opt/local && apt-get update && apt-get install -y --no-install-recommends git \
-    $([ -n "$STANDALONE" ] || echo "autoconf automake build-essential libtool libgmp-dev \
-                                     libsqlite3-dev python python3 wget zlib1g-dev")
+    $([ -n "$STANDALONE" ] || echo "autoconf automake build-essential gettext libtool libgmp-dev \
+                                     libsqlite3-dev python python3 python3-mako wget zlib1g-dev")
 
 ARG TESTRUNNER
 ARG LIGHTNINGD_VERSION=master

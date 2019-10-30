@@ -60,7 +60,7 @@ grs -rpcwait getblockchaininfo > /dev/null
 addr=`grs getnewaddress`
 
 echo - Generating some blocks... > $dbgout
-grs generate 432 > /dev/null
+grs generatetoaddress 101 $addr > /dev/null
 
 # Setup lightningd
 
