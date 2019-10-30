@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xeo pipefail
 
-docker_name=shesek/lightning-charge
+docker_name=groestlcoin/groestlcoin-lightning-charge
 version=`node -p 'require("./package").version'`
 
 # Building the arm32v7 image requires registering qemu on the host, which can be done using one of the following:
