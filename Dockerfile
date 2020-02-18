@@ -19,7 +19,7 @@ RUN [ -n "$STANDALONE" ] || \
     && rm -r target/share \
     && mv -f target/* /opt/local/)
 
-ENV GROESTLCOIN_VERSION 2.17.2
+ENV GROESTLCOIN_VERSION 2.18.2
 ENV GROESTLCOIN_FILENAME groestlcoin-$GROESTLCOIN_VERSION-x86_64-linux-gnu.tar.gz
 ENV GROESTLCOIN_URL https://github.com/Groestlcoin/groestlcoin/releases/download/v$GROESTLCOIN_VERSION/$GROESTLCOIN_FILENAME
 ENV GROESTLCOIN_SHA256 e90f6ceb56fbc86ae17ee3c5d6d3913c422b7d98aa605226adb669acdf292e9e
@@ -67,9 +67,10 @@ ENV NODE_ENV production
 ARG STANDALONE
 ENV STANDALONE=$STANDALONE
 
-RUN ([ -n "$STANDALONE" ] || ( \
-          apt-get update && apt-get install -y --no-install-recommends inotify-tools libgmp-dev libsqlite3-dev \
-          $(test -n "$TESTRUNNER" && echo jq procps))) \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends inotify-tools \
+    && ([ -n "$STANDALONE" ] || apt-get install -y --no-install-recommends libgmp-dev libsqlite3-dev) \
+    && ([ -z "$TESTRUNNER" ] || apt-get install -y --no-install-recommends jq procps) \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s /opt/charged/bin/charged /usr/bin/charged \
     && mkdir /data \

@@ -30,8 +30,8 @@ CHARGE_TOKEN=`head -c 10 /dev/urandom | base64 | tr -d '+/='`
 CHARGE_URL=http://api-token:$CHARGE_TOKEN@localhost:$CHARGE_PORT
 
 alias grs="groestlcoin-cli --datadir=$GRS_DIR"
-alias lna="lightning-cli --lightning-dir=$LN_ALICE_PATH"
-alias lnb="lightning-cli --lightning-dir=$LN_BOB_PATH"
+alias lna="lightning-cli --lightning-dir=$LN_ALICE_PATH --network regtest"
+alias lnb="lightning-cli --lightning-dir=$LN_BOB_PATH --network regtest"
 
 echo Setting up test environment in $DIR
 
@@ -67,14 +67,18 @@ grs generatetoaddress 101 $addr > /dev/null
 echo Setting up lightningd >&2
 
 LN_OPTS="$LN_OPTS --network=regtest --dev-bitcoind-poll=1 --bitcoin-datadir=$GRS_DIR --log-level=debug --log-file=debug.log
+  --fee-base 0 --fee-per-satoshi 0
   --allow-deprecated-apis="$([ -n "$ALLOW_DEPRECATED" ] && echo true || echo false)
 
 lightningd $LN_OPTS --addr=127.0.0.1:`get-port` --lightning-dir=$LN_ALICE_PATH  &> $dbgout &
 lightningd $LN_OPTS --addr=127.0.0.1:`get-port` --lightning-dir=$LN_BOB_PATH &> $dbgout &
 
+LN_ALICE_PATH="$LN_ALICE_PATH/regtest"
+LN_BOB_PATH="$LN_BOB_PATH/regtest"
+
 echo - Waiting for lightningd rpc unix socket... > $dbgout
-sed $sedq "/Listening on 'lightning-rpc'/ q" <(tail -F -n+0 $LN_ALICE_PATH/debug.log 2> /dev/null)
-sed $sedq "/Listening on 'lightning-rpc'/ q" <(tail -F -n+0 $LN_BOB_PATH/debug.log 2> /dev/null)
+sed $sedq "/Server started with public key/ q" <(tail -F -n+0 $LN_ALICE_PATH/debug.log 2> /dev/null)
+sed $sedq "/Server started with public key/ q" <(tail -F -n+0 $LN_BOB_PATH/debug.log 2> /dev/null)
 
 echo - Funding lightning wallet... > $dbgout
 grs sendtoaddress $(lnb newaddr | jq -r .address) 1 > $dbgout

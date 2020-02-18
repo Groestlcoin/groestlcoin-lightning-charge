@@ -6,8 +6,8 @@ cat <<EOL
 You can access groestlcoind and lightningd via:
 
   $ groestlcoin-cli --datadir=$GRS_DIR
-  $ lightning-cli --lightning-dir=$LN_ALICE_PATH
-  $ lightning-cli --lightning-dir=$LN_BOB_PATH
+  $ lightning-cli --rpc-file=$LN_ALICE_PATH/lightning-rpc
+  $ lightning-cli --rpc-file=$LN_BOB_PATH/lightning-rpc
 
 Groestlcoin Lightning Charge is available at:
 
