@@ -42,6 +42,7 @@ mkdir -p $GRS_DIR
 cat >$GRS_DIR/groestlcoin.conf <<EOL
 regtest=1
 printtoconsole=0
+fallbackfee=0.00001
 
 [regtest]
 rpcport=`get-port`
@@ -66,7 +67,7 @@ grs generatetoaddress 101 $addr > /dev/null
 
 echo Setting up lightningd >&2
 
-LN_OPTS="$LN_OPTS --network=regtest --dev-bitcoind-poll=1 --bitcoin-datadir=$GRS_DIR --log-level=debug --log-file=debug.log
+LN_OPTS="$LN_OPTS --network=regtest --bitcoin-datadir=$GRS_DIR --log-level=debug --log-file=debug.log
   --fee-base 0 --fee-per-satoshi 0
   --allow-deprecated-apis="$([ -n "$ALLOW_DEPRECATED" ] && echo true || echo false)
 

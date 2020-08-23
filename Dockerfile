@@ -14,15 +14,15 @@ RUN [ -n "$STANDALONE" ] || \
     && cd /opt/lightningd \
     && git checkout $LIGHTNINGD_VERSION \
     && DEVELOPER=$TESTRUNNER ./configure --prefix=./target \
-    && make -j3 \
+    && make \
     && make install \
     && rm -r target/share \
     && mv -f target/* /opt/local/)
 
-ENV GROESTLCOIN_VERSION 2.19.1
+ENV GROESTLCOIN_VERSION 2.20.1
 ENV GROESTLCOIN_FILENAME groestlcoin-$GROESTLCOIN_VERSION-x86_64-linux-gnu.tar.gz
 ENV GROESTLCOIN_URL https://github.com/Groestlcoin/groestlcoin/releases/download/v$GROESTLCOIN_VERSION/$GROESTLCOIN_FILENAME
-ENV GROESTLCOIN_SHA256 0646cae023a0be0821f357d33bdbf81fc05fc9a9e3e9d4e5936d5053f1a988d4
+ENV GROESTLCOIN_SHA256 0a877be9dac14f4d9aab95d6bfd51547275acbcc3e6553f0cb82c5c9f35f333c
 ENV GROESTLCOIN_ASC_URL https://github.com/Groestlcoin/groestlcoin/releases/download/v$GROESTLCOIN_VERSION/SHA256SUMS.asc
 ENV GROESTLCOIN_PGP_KEY 287AE4CA1187C68C08B49CB2D11BD4F33F1DB499
 RUN [ -n "$STANDALONE" ] || \

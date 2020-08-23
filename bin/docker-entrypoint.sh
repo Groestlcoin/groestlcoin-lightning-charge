@@ -4,7 +4,7 @@ trap 'kill `jobs -p`' SIGTERM
 
 : ${NETWORK:=testnet}
 : ${LIGHTNINGD_OPT:=--log-level=debug}
-: ${BITCOIND_OPT:=-debug=rpc --printtoconsole=0}
+: ${BITCOIND_OPT:=-debug=rpc --printtoconsole=0 --fallbackfee=0.00001}
 
 [[ "$NETWORK" == "mainnet" ]] && NETWORK=groestlcoin
 
@@ -46,8 +46,6 @@ else
     RPC_OPT="-datadir=/data/groestlcoin"
 
     groestlcoind $NETWORK_ARG $RPC_OPT $BITCOIND_OPT &
-    echo -n "waiting for cookie... "
-    sed --quiet '/^\.cookie$/ q' <(inotifywait -e create,moved_to --format '%f' -qmr /data/groestlcoin)
   fi
 
   echo -n "waiting for RPC... "
@@ -66,13 +64,17 @@ else
   lightningd "${lnopt[@]}" $(echo "$RPC_OPT" | sed -r 's/(^| )-/\1--groestlcoin-/g') > /dev/null &
 fi
 
-if [ ! -S /etc/lightning/lightning-rpc ]; then
+LN_NET_PATH=$LN_PATH/$NETWORK
+mkdir -p $LN_NET_PATH
+
+if [ ! -S $LN_NET_PATH/lightning-rpc ]; then
   echo -n "waiting for RPC unix socket... "
-  sed --quiet '/^lightning-rpc$/ q' <(inotifywait -e create,moved_to --format '%f' -qm $LN_PATH)
+  sed --quiet '/^lightning-rpc$/ q' <(inotifywait -e create,moved_to --format '%f' -qm $LN_NET_PATH)
 fi
+sleep 0.5
 
 if command -v lightning-cli > /dev/null; then
-  lightning-cli --rpc-file=$LN_PATH/lightning-rpc getinfo > /dev/null
+  lightning-cli --rpc-file=$LN_NET_PATH/lightning-rpc --network=$NETWORK getinfo > /dev/null
   echo -n "c-lightning RPC ready."
 fi
 
@@ -80,11 +82,11 @@ echo -e "\nStarting Groestlcoin Lightning Charge"
 
 if [ -z "$STANDALONE"  ]; then
     # when not in standalone mode, run spark-wallet as an additional background job
-  charged -d /data/charge.db -l $LN_PATH -i 0.0.0.0 "$@" $CHARGED_OPTS &
+  charged -d /data/charge.db -l $LN_NET_PATH -i 0.0.0.0 "$@" $CHARGED_OPTS &
 
   # shutdown the entire process when any of the background jobs exits (even if successfully)
   wait -n
   kill -TERM $$
 else
-  exec charged -d /data/charge.db -l $LN_PATH -i 0.0.0.0 "$@" $CHARGED_OPTS
+  exec charged -d /data/charge.db -l $LN_NET_PATH -i 0.0.0.0 "$@" $CHARGED_OPTS
 fi
